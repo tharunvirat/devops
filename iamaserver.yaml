@@ -1,0 +1,23 @@
+K8S_NAMESPACE: default
+  K8S_DEPLOYMENT: default
+  EKS_CLUSTER_NAME: api-v1-eks
+  AWS_REGION: us-east-2
+  AWS_ACCOUNT_ID: ${{secrets.AWS_ACCOUNT_ID}}
+  AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY}}
+  AWS_SECRET:_ACCESS_KEY ${{secrets.AWS_ACCESS_SECRET}}
+  AWS_DEFAULT_OUTPUT: json
+  CONTAINER_IMAGE: devops-test: ${{ github.sha }}
+jobs:
+  build:
+    env:
+      ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      ECR_REPOSITORY: iamaserver
+      IMAGE_TAG: latest docker build -t $CONTAINER_IMAGE -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CONTAINER_IMAGE ./devops-test
+    - name: Kubeconfig
+      id: deploy-k8s-yaml
+      env:
+        K8S_YAML_DIR: ./
+        IMAGE_NAME: ${{ steps.build-image.outputs.image }}
+    run: | 
+      Deployment.yaml edit set image $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CONTAINER_IMAGE
+      cat customisation.yaml
